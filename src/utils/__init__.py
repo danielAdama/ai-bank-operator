@@ -5,10 +5,6 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 import os
 
-print(os.environ.get("REDIS_HOST"))
-print(int(os.environ.get("REDIS_PORT")))
-print(int(os.environ.get("REDIS_DB")))
-
 def get_redis_client():
     return redis.Redis(
         host=os.environ.get("REDIS_HOST"), 

@@ -21,12 +21,11 @@ from services.response_check import (
     handle_error_render_json_response, 
     handle_success_render_json_response
 )
-from config import PROMPT_DIR, client, redis_client
+from config import PROMPT_DIR, OPENAI_MODEL, client, redis_client
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
-
 
 system_template = load_file(PROMPT_DIR / "system_template.txt")
 user_template = load_file(PROMPT_DIR / "user_template.txt")
@@ -74,7 +73,9 @@ async def send_message(
             status_code=status.HTTP_200_OK
         )
     except Exception as ex:
-        response = handle_error_render_json_response(ex)
         logger.error(f"processing your message: {ex}")
-        response["message"] = "Error processing your message"
-        return response
+        return handle_error_render_json_response(
+            ex, 
+            data={"message": "Error processing your message"}, 
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

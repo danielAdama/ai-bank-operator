@@ -11,7 +11,7 @@ shutdown_compose::
 
 start_dev:
 	@echo "Running app in development.."
-	cd src && uvicorn main:app --reload --host 0.0.0.0 --port 80
+	cd src && uvicorn main:app --reload --host 0.0.0.0 --port 8080
 
 start_prod:
 	@echo "Running app in production..."

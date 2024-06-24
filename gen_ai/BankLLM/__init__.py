@@ -3,6 +3,8 @@ import re
 import redis
 from typing import List, Dict, AnyStr, Union, Optional
 from groq import Groq
+from openai import OpenAI
+from config import OPENAI_MODEL
 import os
 import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -14,11 +16,11 @@ class BankOperator:
             self, 
             system_prompt: AnyStr,
             tools: List,
-            client: Groq,
+            client: Union[Groq, OpenAI],
             redis_client: redis.Redis,
             names_to_functions: Optional[Union[Dict, None]] = None,
             model: str = "llama3-70b-8192", 
-            max_tokens: int = 100,
+            max_tokens: int = 150,
             temperature: float = 0.7,
             user_id: str = "test-user"
         ):
@@ -83,8 +85,11 @@ class BankOperator:
 
     def run_conversation(self, user_prompt, query):
         self.messages.append({'role': 'user', 'content': user_prompt.format(query=query)})
-        self.save_messages()  # Cache message after adding user message
-        
+        self.save_messages()  # Cache message
+
+        if isinstance(self.client, OpenAI):
+            self.model = OPENAI_MODEL
+
         # Step1: Check if the users question requires calling a function
         completion = self.client.chat.completions.create(
             messages=self.messages,
@@ -97,6 +102,8 @@ class BankOperator:
         response_message = completion.choices[0].message
         tool_calls = response_message.tool_calls
 
+        logger.info(response_message)
+
         # Step 2: Check if the model wants to use a tool
         if tool_calls:
             for tool_call in tool_calls:
@@ -105,21 +112,31 @@ class BankOperator:
                 
                 if not self.names_to_functions:
                    raise ValueError(f"names_to_functions is not provided {self.names_to_functions}")
+                
                 function_to_call = self.names_to_functions.get(function_name)
                 if function_to_call:
                     try:
                         function_response = function_to_call(**function_args) if function_args else function_to_call()
                     except TypeError as ex:
                         logger.error(f"Calling function {function_name}: {ex}")
-                else:
-                    logger.error(f"Function {function_name} not found in names_to_functions")
+                    else:
+                        if isinstance(self.client, OpenAI):
+                            self.messages.append({
+                                "role": "assistant",
+                                "content": function_response,
+                            })
+                        else:
+                            logger.info(f"Switching to Groq as client for function calling. Make sure you are using Groq as client")
                 
-                self.messages.append({
-                    "tool_call_id": tool_call.id,
-                    "role": "tool",
-                    "name": function_name,
-                    "content": function_response,
-                })
+                if isinstance(self.client, Groq):
+                    self.messages.append(
+                            {
+                                "tool_call_id": tool_call.id,
+                                "role": "tool",
+                                "name": function_name,
+                                "content": function_response
+                            }
+                        )
         
         # Step 3: Process both the function response if used or process the users input without function use.
         completion2 = self.client.chat.completions.create(
@@ -130,5 +147,6 @@ class BankOperator:
         )
         conversation = completion2.choices[0].message.content
         self.messages.append({'role': 'assistant', 'content': conversation})
+        self.save_messages() 
 
         return conversation

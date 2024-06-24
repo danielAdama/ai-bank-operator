@@ -24,7 +24,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "generate_balance_sheet",
-            "description": "generating a balance sheet report",
+            "description": "Generate a balance sheet report",
             "parameters": {
                 "type": "object",
                 "properties": {

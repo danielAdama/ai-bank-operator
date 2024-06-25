@@ -1,11 +1,11 @@
 .PHONY: initial program setup start_dev
 
 
-start_compose:
+compose_up:
 	@echo "Running docker compose..."
 	docker-compose up -d
 
-shutdown_compose::
+compose_down:
 	@echo "Shutting down docker compose..."
 	docker-compose down
 

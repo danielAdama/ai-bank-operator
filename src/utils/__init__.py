@@ -8,8 +8,9 @@ import os
 def get_redis_client():
     return redis.Redis(
         host=os.environ.get("REDIS_HOST"), 
-        port=int(os.environ.get("REDIS_PORT")), 
-        db=int(os.environ.get("REDIS_DB"))
+        port=int(os.environ.get("REDIS_PORT")),
+        # db=os.environ.get("REDIS_DB"),
+        password=os.environ.get("REDIS_PASSWORD")
     )
 
 @asynccontextmanager

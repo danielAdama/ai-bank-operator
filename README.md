@@ -1,33 +1,37 @@
-# ai-bank-operator
+# AI Bank Operator
 
-AI Bank Operator is a project designed to interact with customers using Generative AI models. This README provides instructions on how to set up and run the project.
+A customer-facing banking assistant that answers customers using generative AI models. It runs as an API with Redis alongside it and starts with a single Docker Compose command.
 
-## Prerequisites
+## Features
 
-- Docker
-- Docker Compose
-- Python 3.11
-- Redis
+- Chat endpoint for customer conversations, backed by OpenAI or Groq models
+- Redis service included in the Docker Compose setup
+- Development and production run modes
+- Containerised with Docker and Docker Compose
 
-## Setup
+## Built with
 
-### 1. Clone the Repository
+Python 3.11 · OpenAI · Groq · Redis · Docker
 
-Clone the repository to your local machine using the following command:
+## Quick start with Docker
 
-```sh
+### Prerequisites
+
+- [Docker and Docker Compose](https://docs.docker.com/get-docker/)
+- An OpenAI API key and a Groq API key
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/danielAdama/ai-bank-operator.git
-```
-```sh
 cd ai-bank-operator
 ```
-### 2. Create an Environment File
-Create a .env file in the root directory of the project with the following command:
-```sh
-touch .env
-```
-After the creation of the .env, add the following environment variables:
-```sh
+
+### 2. Add your environment variables
+
+Create a `.env` file in the project root with:
+
+```bash
 GROQ_API_KEY=<your-groq-api-key>
 OPENAI_API_KEY=<your-openai-api-key>
 MODEL=<your-openai-model>
@@ -35,61 +39,69 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_DB=0
 ```
-### 3. Docker Setup
-Ensure Docker and Docker Compose are installed on your system. You can download Docker and Docker Compose from <https://docker-docs.uclv.cu/get-docker/>.
-### 4. Build and Run the Project
-Use the following command to build and run the project with Docker Compose:
 
-```sh
+### 3. Start it
+
+```bash
 docker-compose up -d
 ```
-This command will build the Docker images and start the services defined in the docker-compose.yml file.
-### 5. Access the Application
-The application will be running at `http://localhost:80`.
 
-### Project Structure
-* src/: Contains the source code for the application.
-* gen_ai/: Contains the AI models and utilities.
-* utils/: Contains utility functions.
-* config/: Configuration files for the project.
-* Dockerfile: Dockerfile for building the Docker image.
-* docker-compose.yml: Docker Compose configuration file.
-* requirements.txt: Python dependencies.
+This builds the images and starts every service in `docker-compose.yml`, including Redis. The app is then available at http://localhost:80.
 
-### Makefile Commands
-The project includes a Makefile with the following commands:
+To stop it:
 
-* compose_up: Runs Docker Compose to start the services.
-* compose_down: Shuts down the Docker Compose services.
-* start_dev: Runs the application in development mode.
-* start_prod: Runs the application in production mode.
-### API Endpoints
-The application exposes the following API endpoints:
+```bash
+docker-compose down
+```
 
-POST /v1/chat/messages/: Chat with the Large Language Model.
-### Running the Application Locally
-1. Install Dependencies
-Ensure you have Python 3.11 installed. Then, install the dependencies using the following command:
+## Run locally without Docker
 
-```sh
+You need Python 3.11 and a Redis server running on your machine. Set `REDIS_HOST=localhost` in your `.env`.
+
+```bash
 python3 -m pip install --upgrade pip
-```
-```sh
 pip3 install --no-cache-dir -r requirements.txt
-```
-2. Run the Application
-Use the following command to run the application in development mode:
 
-```sh
-make start_dev
+make start_dev     # development mode
+make start_prod    # production mode
 ```
-For production mode, use:
 
-```sh
-make start_prod
+## API
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `POST` | `/v1/chat/messages/` | Sends a customer message and returns the assistant's reply |
+
+## Makefile commands
+
+| Command | What it does |
+|---|---|
+| `make compose_up` | Start the services with Docker Compose |
+| `make compose_down` | Stop the services |
+| `make start_dev` | Run the app in development mode |
+| `make start_prod` | Run the app in production mode |
+
+## Project structure
+
 ```
-Contributing
-Contributions are welcome! Please create a pull request with your changes.
+ai-bank-operator/
+├── src/                 # Application source code
+├── gen_ai/              # AI models and utilities
+├── config/              # Configuration
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+└── requirements.txt
+```
 
-License
-This project is licensed under the MIT License.
+## Contributing
+
+Contributions are welcome. Open a pull request with your changes.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Contact
+
+Daniel Enemona Adama · [adamadaniel321@gmail.com](mailto:adamadaniel321@gmail.com) · [Portfolio](https://daniel-adama.vercel.app)
